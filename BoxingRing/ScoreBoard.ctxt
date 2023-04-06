@@ -1,0 +1,13 @@
+#BlueJ class context
+comment0.target=ScoreBoard
+comment0.text=\r\n\ ScoreBoard\ class\ creates\ a\ score\ board\ at\ the\ end\ of\ the\ game\ and\ displays\r\n\ different\ results\ depending\ on\ if\ you\ win\ or\ lose.\r\n\ \r\n\ @author\ Adam\ Pratt\ and\ Ben\ Slater\r\n\ @version\ v1.1\ Release\ 5/8/2018\r\n
+comment1.params=
+comment1.target=ScoreBoard()
+comment1.text=\r\n\ Create\ a\ score\ board\ with\ dummy\ result\ for\ testing.\r\n
+comment2.params=score\ isWinner
+comment2.target=ScoreBoard(int,\ boolean)
+comment2.text=\r\n\ Create\ a\ score\ board\ for\ the\ final\ result.\r\n
+comment3.params=title\ prefix\ score
+comment3.target=void\ makeImage(java.lang.String,\ java.lang.String,\ int)
+comment3.text=\r\n\ Make\ the\ score\ board\ image.\r\n
+numComments=4

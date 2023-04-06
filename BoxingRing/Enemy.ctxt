@@ -1,0 +1,24 @@
+#BlueJ class context
+comment0.target=Enemy
+comment0.text=\r\n\ The\ enemy\ class\ extends\ the\ Fighter\ class,\ adding\ data\ fields\ and\ methods\ for\ a\ fighter\ that\r\n\ will\ be\ controlled\ by\ random\ number\ generation.\ \ These\ data\ fileds\ can\ be\ manipulated\ to\ control\ \r\n\ the\ difficulty\ level\ of\ the\ enemy\ object.\ \ The\ class\ includes\ getters\ and\ setters\ for\ any\ data\ \r\n\ needed\ outside\ of\ the\ enemy\ class,\ and\ overwrites\ the\ stub\ methods\ from\ the\ fighter\ class.\ \ \r\n\ Also\ generates\ a\ random\ number\ to\ determine\ the\ enemy\ objects\ actions.\r\n\ \r\n\ @author\ Adam\ Pratt\ and\ Ben\ Slater\r\n\ @version\ v1.1\ Release\ 5/8/2018\r\n
+comment1.params=
+comment1.target=Enemy()
+comment1.text=Constructors
+comment2.params=maxHealth\ base\ rightHook\ leftHook\ blocking\ minDelay\ damageMod\ damageResist
+comment2.target=Enemy(int,\ java.lang.String,\ java.lang.String,\ java.lang.String,\ java.lang.String,\ int,\ double,\ double)
+comment3.params=
+comment3.target=double\ getDamageResist()
+comment3.text=Getters
+comment4.params=
+comment4.target=void\ act()
+comment4.text=\r\n\ Act\ -\ Start\ by\ checking\ health,\ then\ determine\ if\ it\ is\ time\ to\ act\ yet.\ \ If\ so,\ \r\n\ call\ chooseAction\ to\ select\ a\ random\ action.\r\n
+comment5.params=
+comment5.target=void\ chooseAction()
+comment5.text=\r\n\ Randomly\ selects\ and\ action\ for\ the\ enemy\ to\ perform,\ and\ updates\ with\ the\ \r\n\ appropriate\ image.\ \ Also\ updates\ the\ appropriate\ status\ booleans.\r\n
+comment6.params=
+comment6.target=void\ checkHealth()
+comment6.text=\r\n\ Checks\ health\ of\ enemy\ and\ changes\ images\ if\ damaged\ and\ checks\ for\ death.\r\n\ If\ wounded,\ change\ image\ set\ to\ wounded\ sprites.\r\n\ If\ dead,\ call\ the\ gameOver\ method.\r\n
+comment7.params=player
+comment7.target=void\ punch(Player)
+comment7.text=\r\n\ Checks\ if\ enemy's\ punch\ connects,\ and\ plays\ the\ appropriate\ sound\ effect.\r\n\ Also\ deals\ damage,\ calls\ the\ redrawing\ of\ the\ healthbars,\ and\ sets\ the\ consecutive\ \r\n\ hit\ counter\ to\ zero.\r\n
+numComments=8

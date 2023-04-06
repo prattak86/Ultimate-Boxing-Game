@@ -1,0 +1,13 @@
+#BlueJ class context
+comment0.target=StartFight
+comment0.text=\r\n\ Create\ a\ welcome\ screen\ in\ the\ world\ to\ provide\ user\ input\ controls.\ This\ also\ \r\n\ enables\ the\ user\ to\ click\ anywhere\ on\ the\ StartFight\ screen\ to\ start\ the\ fight\ \r\n\ and\ initiate\ the\ construction\ of\ the\ other\ objects\ in\ the\ world.\r\n\ \r\n\ @author\ Adam\ Pratt\ and\ Ben\ Slater\r\n\ @version\ v1.1\ Release\ 5/8/2018\r\n
+comment1.params=
+comment1.target=StartFight()
+comment1.text=\r\n\ Create\ a\ display\ screen\ to\ provide\ user\ input\ controls.\ This\ also\ enables\ the\r\n\ user\ to\ click\ anywhere\ on\ the\ StartFight\ screen\ to\ start\ the\ fight\ and\ initiate\r\n\ the\ construction\ of\ the\ other\ objects\ in\ the\ world.\r\n
+comment2.params=welcomeTitle\ controlString\ controlString2\ controlString3\ playString
+comment2.target=void\ makeImage(java.lang.String,\ java.lang.String,\ java.lang.String,\ java.lang.String,\ java.lang.String)
+comment2.text=\r\n\ Make\ the\ start\ fight\ image,\ welcome\ title,\ and\ controls.\r\n
+comment3.params=
+comment3.target=void\ act()
+comment3.text=\r\n\ Mouse\ click\ will\ act\ upon\ the\ object\ to\ initiate\ the\ createMatch()\ method\ inside\r\n\ the\ Ring\ class\ to\ build\ the\ remaining\ objects\ in\ the\ World.\ Mouse\ click\ will\ also\r\n\ cause\ the\ start\ fight\ object\ to\ remove\ itself.\r\n
+numComments=4

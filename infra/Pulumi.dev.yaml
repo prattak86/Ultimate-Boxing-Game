@@ -1,0 +1,10 @@
+config:
+  azure-native:location: West Europe
+  pulumi:template: vm-azure-csharp
+  vm-azure-csharp:adminUsername: pulumiuser
+  vm-azure-csharp:osImage: amt-window-baseline-v6:0.0.6
+  vm-azure-csharp:servicePort: "443"
+  vm-azure-csharp:vmName: my-server
+  vm-azure-csharp:vmSize: Standard_D2s_v3
+environment:
+  - dev

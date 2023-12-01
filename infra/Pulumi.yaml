@@ -1,0 +1,3 @@
+name: vm-azure-csharp
+runtime: dotnet
+description: A C# program to deploy a virtual machine on Azure

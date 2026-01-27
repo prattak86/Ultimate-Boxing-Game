@@ -56,10 +56,11 @@ If you need to test publishing from feature branches, you can enable the `publis
    if: github.ref != 'refs/heads/main' && github.event_name == 'push'
    ```
 
-This will publish versions like:
+This will publish versions with branch name suffixes when pushing to feature branches:
 - Branch `copilot/feature-x` → `2.0.0-copilot-feature-x`
 - Branch `develop` → `2.0.0-develop`
-- Pull Request #123 → `2.0.0-PR123`
+
+**Note**: Pull Request events do not trigger publishing - only direct pushes to feature branches.
 
 ## Version Suffix Examples
 
@@ -68,7 +69,8 @@ This will publish versions like:
 | main | (none) | 2.0.0 |
 | copilot/fix-bug | copilot-fix-bug | 2.0.0-copilot-fix-bug |
 | feature/new-api | feature-new-api | 2.0.0-feature-new-api |
-| PR #42 | PR42 | 2.0.0-PR42 |
+
+**Note**: Pull requests do not publish packages - only direct pushes to branches.
 
 ## Maven Configuration
 

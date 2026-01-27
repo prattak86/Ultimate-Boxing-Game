@@ -97,7 +97,7 @@ jobs:
 
   publish-snapshot-from-branch:
     runs-on: ubuntu-latest
-    # Optional: Enable this job by setting github.event_name to 'push' to publish snapshots from feature branches
+    # Optional: Enable this job by removing "false &&" from the condition below
     # This job is disabled by default to prevent version conflicts
     if: false && github.ref != 'refs/heads/main' && github.event_name == 'push'
     needs: build
@@ -116,7 +116,7 @@ jobs:
         distribution: 'temurin'
         cache: maven
 
-    - name: Extract branch name
+    - name: Extract branch name and create version suffix
       id: extract_branch
       run: |
         # Extract branch name and sanitize it for version string
@@ -124,13 +124,7 @@ jobs:
         # Replace invalid characters with hyphens
         SANITIZED_BRANCH=$(echo "$BRANCH_NAME" | sed 's/[^a-zA-Z0-9-]/-/g' | sed 's/--*/-/g')
         echo "branch=$SANITIZED_BRANCH" >> $GITHUB_OUTPUT
-        
-        # Extract PR number if this is from a PR
-        if [ "${{ github.event_name }}" = "pull_request" ]; then
-          echo "version_suffix=PR${{ github.event.pull_request.number }}" >> $GITHUB_OUTPUT
-        else
-          echo "version_suffix=$SANITIZED_BRANCH" >> $GITHUB_OUTPUT
-        fi
+        echo "version_suffix=$SANITIZED_BRANCH" >> $GITHUB_OUTPUT
 
     - name: Set dynamic version
       run: |

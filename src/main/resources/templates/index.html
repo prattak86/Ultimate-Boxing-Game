@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultimate Boxing Game</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <div class="container">
+        <h1>Ultimate Boxing Game</h1>
+        
+        <div id="game-container">
+            <!-- Start Screen -->
+            <div id="start-screen" class="screen">
+                <div class="welcome-box">
+                    <h2>WELCOME TO ULTIMATE BOXING!</h2>
+                    <div class="controls">
+                        <p><strong>Controls:</strong></p>
+                        <p>'A' or Click Left Punch button = Left Punch</p>
+                        <p>'S' or Click Block button = Block</p>
+                        <p>'D' or Click Right Punch button = Right Punch</p>
+                    </div>
+                    <button id="start-button" class="game-button">Click HERE to start the fight!</button>
+                </div>
+            </div>
+
+            <!-- Game Screen -->
+            <div id="game-screen" class="screen" style="display: none;">
+                <div class="game-area">
+                    <!-- Health Bars -->
+                    <div class="health-container">
+                        <div class="player-health-box">
+                            <div class="health-label">Victor 'The People's Champ' Bilko</div>
+                            <div class="health-bar-outer">
+                                <div id="player-health-bar" class="health-bar"></div>
+                            </div>
+                        </div>
+                        <div class="score-display">
+                            <span id="score-text">Player Score: 0</span>
+                        </div>
+                        <div class="enemy-health-box">
+                            <div class="health-label">Danny 'Big Red' McDoogle</div>
+                            <div class="health-bar-outer">
+                                <div id="enemy-health-bar" class="health-bar"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Boxing Ring -->
+                    <div class="ring">
+                        <div class="fighters">
+                            <div id="enemy-sprite" class="fighter enemy">
+                                <img id="enemy-img" src="/images/enemyBase.png" alt="Enemy">
+                            </div>
+                            <div id="player-sprite" class="fighter player">
+                                <img id="player-img" src="/images/playerBase.png" alt="Player">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Message Display -->
+                    <div id="message-display" class="message"></div>
+
+                    <!-- Control Buttons -->
+                    <div class="controls-container">
+                        <button id="left-punch-btn" class="control-button">Left Punch (A)</button>
+                        <button id="block-btn" class="control-button">Block (S)</button>
+                        <button id="right-punch-btn" class="control-button">Right Punch (D)</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Game Over Screen -->
+            <div id="gameover-screen" class="screen" style="display: none;">
+                <div class="gameover-box">
+                    <img id="result-image" src="" alt="Result">
+                    <h2 id="result-text"></h2>
+                    <p id="final-score"></p>
+                    <button id="reset-button" class="game-button">Play Again</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Audio Elements -->
+    <audio id="crowd-cheer" src="/sounds/crowdCheer.mp3"></audio>
+    <audio id="crowd-sad" src="/sounds/crowdSad.mp3"></audio>
+    <audio id="punch-sound" src="/sounds/punch.mp3"></audio>
+    <audio id="miss-sound" src="/sounds/miss.mp3"></audio>
+    <audio id="theme-music" src="/sounds/Rocky Theme Song.mp3" loop></audio>
+
+    <script th:src="@{/js/game.js}"></script>
+</body>
+</html>

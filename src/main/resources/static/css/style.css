@@ -1,0 +1,300 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+}
+
+.container {
+    width: 100%;
+    max-width: 900px;
+    padding: 20px;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 2.5em;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+#game-container {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.screen {
+    min-height: 500px;
+}
+
+/* Welcome Screen */
+.welcome-box {
+    background: rgba(155, 155, 255, 0.2);
+    border: 3px solid rgba(0, 200, 50, 0.5);
+    border-radius: 10px;
+    padding: 40px;
+    text-align: center;
+}
+
+.welcome-box h2 {
+    font-size: 2em;
+    margin-bottom: 30px;
+    color: #fff;
+}
+
+.controls {
+    background: rgba(0, 0, 0, 0.3);
+    padding: 20px;
+    border-radius: 8px;
+    margin: 20px 0;
+}
+
+.controls p {
+    font-size: 1.1em;
+    margin: 10px 0;
+}
+
+/* Game Screen */
+.game-area {
+    position: relative;
+}
+
+.health-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    gap: 20px;
+}
+
+.player-health-box,
+.enemy-health-box {
+    flex: 1;
+}
+
+.health-label {
+    font-size: 0.9em;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.player-health-box .health-label {
+    color: #00ff00;
+}
+
+.enemy-health-box .health-label {
+    color: #ff0000;
+    text-align: right;
+}
+
+.health-bar-outer {
+    width: 100%;
+    height: 20px;
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 2px solid #333;
+}
+
+.health-bar {
+    height: 100%;
+    background: #00ff00;
+    transition: width 0.3s ease, background-color 0.3s ease;
+    width: 100%;
+}
+
+.score-display {
+    font-size: 1.3em;
+    font-weight: bold;
+    padding: 10px 20px;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 8px;
+    white-space: nowrap;
+}
+
+/* Boxing Ring */
+.ring {
+    background: url('/images/BoxingRing.jpg') center/cover;
+    height: 400px;
+    border-radius: 10px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+.fighters {
+    position: absolute;
+    bottom: 20px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 40px;
+}
+
+.fighter {
+    position: relative;
+    transition: transform 0.2s ease;
+}
+
+.fighter img {
+    height: 250px;
+    width: auto;
+    filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.5));
+}
+
+.fighter.player img {
+    height: 280px;
+}
+
+.fighter.enemy img {
+    height: 300px;
+}
+
+/* Message Display */
+.message {
+    text-align: center;
+    font-size: 1.5em;
+    font-weight: bold;
+    min-height: 40px;
+    margin: 20px 0;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 8px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* Control Buttons */
+.controls-container {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+
+.control-button {
+    padding: 15px 30px;
+    font-size: 1.1em;
+    font-weight: bold;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.1s, box-shadow 0.1s;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+.control-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+}
+
+.control-button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.control-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Game Button */
+.game-button {
+    padding: 20px 40px;
+    font-size: 1.3em;
+    font-weight: bold;
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+    margin-top: 20px;
+}
+
+.game-button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+}
+
+.game-button:active {
+    transform: scale(0.98);
+}
+
+/* Game Over Screen */
+.gameover-box {
+    text-align: center;
+    padding: 40px;
+}
+
+.gameover-box img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+}
+
+.gameover-box h2 {
+    font-size: 2.5em;
+    margin-bottom: 15px;
+}
+
+.gameover-box p {
+    font-size: 1.5em;
+    margin-bottom: 20px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    h1 {
+        font-size: 1.8em;
+    }
+
+    .health-container {
+        flex-direction: column;
+    }
+
+    .enemy-health-box .health-label {
+        text-align: left;
+    }
+
+    .ring {
+        height: 300px;
+    }
+
+    .fighter img {
+        height: 180px;
+    }
+
+    .fighter.player img {
+        height: 200px;
+    }
+
+    .fighter.enemy img {
+        height: 220px;
+    }
+
+    .controls-container {
+        flex-direction: column;
+    }
+
+    .control-button {
+        width: 100%;
+    }
+}

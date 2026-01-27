@@ -90,6 +90,18 @@ jobs:
         distribution: 'temurin'
         cache: maven
 
+    - name: Set dynamic version with commit SHA
+      run: |
+        # Get the base version from pom.xml (e.g., 2.0.0-SNAPSHOT)
+        BASE_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+        # Get short commit SHA for unique versioning
+        SHORT_SHA=$(git rev-parse --short HEAD)
+        # Create version with commit SHA: 2.0.0-SNAPSHOT becomes 2.0.0-{SHORT_SHA}
+        # Remove -SNAPSHOT suffix and append commit SHA
+        NEW_VERSION="${BASE_VERSION%-SNAPSHOT}-${SHORT_SHA}"
+        echo "Setting version to: $NEW_VERSION"
+        mvn versions:set -DnewVersion="$NEW_VERSION" -DgenerateBackupPoms=false
+
     - name: Publish to GitHub Packages
       run: mvn -B deploy -DskipTests
       env:

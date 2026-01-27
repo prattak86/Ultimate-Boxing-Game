@@ -68,12 +68,12 @@ async function startGame() {
     startScreen.style.display = 'none';
     gameScreen.style.display = 'block';
     
-    // Play crowd cheer
-    crowdCheer.play();
+    // Play crowd cheer with error handling
+    crowdCheer.play().catch(e => console.log('Audio play prevented:', e));
     
     // Wait a bit then start music
     setTimeout(() => {
-        themeMusic.play();
+        themeMusic.play().catch(e => console.log('Audio play prevented:', e));
     }, 1000);
     
     // Get initial game state
@@ -96,14 +96,18 @@ async function performAction(action) {
             body: JSON.stringify({ action: action })
         });
         
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
         gameState = await response.json();
         updateUI();
         
-        // Play sounds based on message
+        // Play sounds based on message with error handling
         if (gameState.message.includes('Hit')) {
-            punchSound.play();
+            punchSound.play().catch(e => console.log('Audio play prevented:', e));
         } else if (gameState.message.includes('Blocked')) {
-            missSound.play();
+            missSound.play().catch(e => console.log('Audio play prevented:', e));
         }
         
         // Reset sprites after animation
@@ -137,6 +141,9 @@ async function performAction(action) {
 async function updateGameState() {
     try {
         const response = await fetch('/api/game/state');
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
         gameState = await response.json();
         updateUI();
     } catch (error) {
@@ -247,12 +254,12 @@ function showGameOver() {
         resultImage.src = '/images/YouWin.jpg';
         resultText.textContent = 'YOU WIN!';
         resultText.style.color = '#00ff00';
-        crowdCheer.play();
+        crowdCheer.play().catch(e => console.log('Audio play prevented:', e));
     } else {
         resultImage.src = '/images/YouLost.jpg';
         resultText.textContent = 'YOU LOST!';
         resultText.style.color = '#ff0000';
-        crowdSad.play();
+        crowdSad.play().catch(e => console.log('Audio play prevented:', e));
     }
     
     finalScore.textContent = 'Final Score: ' + gameState.playerScore;
@@ -264,6 +271,11 @@ async function resetGame() {
         const response = await fetch('/api/game/reset', {
             method: 'POST'
         });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
         gameState = await response.json();
         
         gameoverScreen.style.display = 'none';
@@ -272,7 +284,7 @@ async function resetGame() {
         updateUI();
         enableControls();
         
-        themeMusic.play();
+        themeMusic.play().catch(e => console.log('Audio play prevented:', e));
         
     } catch (error) {
         console.error('Error resetting game:', error);

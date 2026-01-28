@@ -30,6 +30,11 @@
             <name>GitHub Packages</name>
             <url>https://maven.pkg.github.com/prattak86/Ultimate-Boxing-Game</url>
         </repository>
+        <snapshotRepository>
+            <id>github</id>
+            <name>GitHub Packages</name>
+            <url>https://maven.pkg.github.com/prattak86/Ultimate-Boxing-Game</url>
+        </snapshotRepository>
     </distributionManagement>
 
     <dependencies>

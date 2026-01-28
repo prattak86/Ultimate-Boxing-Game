@@ -3,6 +3,8 @@ name: Build and Publish
 on:
   push:
     branches: [ main, copilot/** ]
+    tags:
+      - 'v*'
   pull_request:
     branches: [ main ]
 
@@ -73,7 +75,7 @@ jobs:
 
   publish-to-github-packages:
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')) && github.event_name == 'push'
     needs: build
     permissions:
       contents: read
@@ -90,17 +92,22 @@ jobs:
         distribution: 'temurin'
         cache: maven
 
-    - name: Set dynamic version with commit SHA
+    - name: Set version for release or snapshot
       run: |
-        # Get the base version from pom.xml (e.g., 2.0.0-SNAPSHOT)
-        BASE_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
-        # Get short commit SHA for unique versioning
-        SHORT_SHA=$(git rev-parse --short HEAD)
-        # Create version with commit SHA: 2.0.0-SNAPSHOT becomes 2.0.0-{SHORT_SHA}
-        # Remove -SNAPSHOT suffix and append commit SHA
-        NEW_VERSION="${BASE_VERSION%-SNAPSHOT}-${SHORT_SHA}"
-        echo "Setting version to: $NEW_VERSION"
-        mvn versions:set -DnewVersion="$NEW_VERSION" -DgenerateBackupPoms=false
+        if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+          # For tags: use the tag version (e.g., v2.0.1 -> 2.0.1)
+          TAG_VERSION="${GITHUB_REF#refs/tags/v}"
+          echo "Setting release version to: $TAG_VERSION"
+          mvn versions:set -DnewVersion="$TAG_VERSION" -DgenerateBackupPoms=false
+        else
+          # For main branch: append commit SHA to SNAPSHOT version
+          BASE_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          SHORT_SHA=$(git rev-parse --short HEAD)
+          # Create version with commit SHA: 2.0.0-SNAPSHOT becomes 2.0.0-{SHORT_SHA}-SNAPSHOT
+          NEW_VERSION="${BASE_VERSION%-SNAPSHOT}-${SHORT_SHA}-SNAPSHOT"
+          echo "Setting snapshot version to: $NEW_VERSION"
+          mvn versions:set -DnewVersion="$NEW_VERSION" -DgenerateBackupPoms=false
+        fi
 
     - name: Publish to GitHub Packages
       run: mvn -B deploy -DskipTests

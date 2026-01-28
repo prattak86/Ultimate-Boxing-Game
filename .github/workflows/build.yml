@@ -3,6 +3,8 @@ name: Build and Publish
 on:
   push:
     branches: [ main, copilot/** ]
+    tags:
+      - 'v*'
   pull_request:
     branches: [ main ]
 
@@ -41,7 +43,7 @@ jobs:
       uses: docker/setup-buildx-action@v3
 
     - name: Log in to GitHub Container Registry
-      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      if: (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')) && github.event_name == 'push'
       uses: docker/login-action@v3
       with:
         registry: ghcr.io
@@ -61,7 +63,7 @@ jobs:
           type=raw,value=latest,enable={{is_default_branch}}
 
     - name: Build and push Docker image
-      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      if: (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')) && github.event_name == 'push'
       uses: docker/build-push-action@v5
       with:
         context: .
@@ -73,7 +75,7 @@ jobs:
 
   publish-to-github-packages:
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')) && github.event_name == 'push'
     needs: build
     permissions:
       contents: read
@@ -90,9 +92,58 @@ jobs:
         distribution: 'temurin'
         cache: maven
 
+    - name: Configure Maven authentication
+      run: |
+        # Create Maven settings.xml with authentication for both release and snapshot repositories
+        mkdir -p ~/.m2
+        cat > ~/.m2/settings.xml << 'EOF'
+        <settings>
+          <servers>
+            <server>
+              <id>github-releases</id>
+              <username>${env.GITHUB_ACTOR}</username>
+              <password>${env.GITHUB_TOKEN}</password>
+            </server>
+            <server>
+              <id>github-snapshots</id>
+              <username>${env.GITHUB_ACTOR}</username>
+              <password>${env.GITHUB_TOKEN}</password>
+            </server>
+          </servers>
+        </settings>
+        EOF
+      env:
+        GITHUB_ACTOR: ${{ github.actor }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Set version for release or snapshot
+      run: |
+        set -e  # Exit on error
+        if [[ "$GITHUB_REF" = refs/tags/v* ]]; then
+          # For tags: use the tag version (e.g., v2.0.1 -> 2.0.1)
+          TAG_VERSION="${GITHUB_REF#refs/tags/v}"
+          # Validate tag version is valid (basic semver pattern)
+          if ! [[ "$TAG_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.]+)?$ ]]; then
+            echo "Error: Invalid version tag format: $TAG_VERSION"
+            echo "Expected format: X.Y.Z or X.Y.Z-qualifier (e.g., 2.0.1 or 2.0.1-RC1)"
+            exit 1
+          fi
+          echo "Setting release version to: $TAG_VERSION"
+          mvn versions:set -DnewVersion="$TAG_VERSION" -DgenerateBackupPoms=false
+        else
+          # For main branch: append commit SHA to SNAPSHOT version
+          BASE_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          SHORT_SHA=$(git rev-parse --short HEAD)
+          # Create version with commit SHA: 2.0.0-SNAPSHOT becomes 2.0.0-{SHORT_SHA}-SNAPSHOT
+          NEW_VERSION="${BASE_VERSION%-SNAPSHOT}-${SHORT_SHA}-SNAPSHOT"
+          echo "Setting snapshot version to: $NEW_VERSION"
+          mvn versions:set -DnewVersion="$NEW_VERSION" -DgenerateBackupPoms=false
+        fi
+
     - name: Publish to GitHub Packages
       run: mvn -B deploy -DskipTests
       env:
+        GITHUB_ACTOR: ${{ github.actor }}
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   publish-snapshot-from-branch:

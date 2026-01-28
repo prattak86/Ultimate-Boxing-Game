@@ -143,6 +143,7 @@ jobs:
     - name: Publish to GitHub Packages
       run: mvn -B deploy -DskipTests
       env:
+        GITHUB_ACTOR: ${{ github.actor }}
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   publish-snapshot-from-branch:

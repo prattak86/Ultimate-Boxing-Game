@@ -26,6 +26,11 @@ public class GameController {
         return gameService.processPlayerAction(action.getAction());
     }
 
+    @PostMapping("/enemy-turn")
+    public GameState enemyTurn() {
+        return gameService.processEnemyTurn();
+    }
+
     @PostMapping("/reset")
     public GameState resetGame() {
         return gameService.resetGame();

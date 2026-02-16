@@ -1,6 +1,7 @@
 // Game state
 let gameState = null;
 let isProcessingAction = false;
+let isProcessingEnemyTurn = false;
 let enemyTurnTimer = null;
 let idlePulseTimer = null;
 let refereePoseTimer = null;
@@ -150,7 +151,9 @@ async function performAction(action) {
 }
 
 async function performEnemyTurn() {
-    if (isProcessingAction || gameState?.gameOver) return;
+    if (isProcessingAction || isProcessingEnemyTurn || gameState?.gameOver) return;
+
+    isProcessingEnemyTurn = true;
 
     try {
         const response = await fetch('/api/game/enemy-turn', {
@@ -185,6 +188,8 @@ async function performEnemyTurn() {
         }
     } catch (error) {
         console.error('Error during enemy turn:', error);
+    } finally {
+        isProcessingEnemyTurn = false;
     }
 }
 

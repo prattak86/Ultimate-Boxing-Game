@@ -3,6 +3,7 @@ let gameState = null;
 let isProcessingAction = false;
 let enemyTurnTimer = null;
 let idlePulseTimer = null;
+let refereePoseTimer = null;
 let playerPositionX = -140;
 let enemyPositionX = 140;
 
@@ -34,6 +35,8 @@ const playerImg = document.getElementById('player-img');
 const enemyImg = document.getElementById('enemy-img');
 const playerFighter = document.getElementById('player-sprite');
 const enemyFighter = document.getElementById('enemy-sprite');
+const refereeImg = document.getElementById('referee-img');
+const refereeFighter = document.getElementById('referee-sprite');
 
 // Buttons
 const startButton = document.getElementById('start-button');
@@ -83,7 +86,9 @@ async function startGame() {
     await updateGameState();
     startEnemyTurnLoop();
     startIdleMovement();
+    startRefereeAnimation();
     applyFighterPositions();
+    setRefereePose('fight');
 }
 
 // Perform player action
@@ -224,6 +229,11 @@ function stopGameLoops() {
         clearInterval(idlePulseTimer);
         idlePulseTimer = null;
     }
+
+    if (refereePoseTimer) {
+        clearInterval(refereePoseTimer);
+        refereePoseTimer = null;
+    }
 }
 
 function animateExchange(playerAction, enemyAction) {
@@ -260,6 +270,44 @@ function applyFighterPositions() {
 
 function clamp(value, min, max) {
     return Math.max(min, Math.min(max, value));
+}
+
+function startRefereeAnimation() {
+    if (refereePoseTimer) {
+        clearInterval(refereePoseTimer);
+    }
+
+    setRefereePose('fight');
+
+    refereePoseTimer = setInterval(() => {
+        if (gameState?.gameOver) {
+            return;
+        }
+
+        const poses = ['moveLegs', 'squat', 'whistle'];
+        const randomPose = poses[Math.floor(Math.random() * poses.length)];
+        setRefereePose(randomPose);
+    }, 1300);
+}
+
+function setRefereePose(pose) {
+    if (!refereeImg) {
+        return;
+    }
+
+    const poseMap = {
+        fight: '/images/refereeFight.svg',
+        moveLegs: '/images/refereeMoveLegs.svg',
+        squat: '/images/refereeSquat.svg',
+        whistle: '/images/refereeWhistle.svg'
+    };
+
+    refereeImg.src = poseMap[pose] || poseMap.fight;
+
+    if (refereeFighter) {
+        const wiggle = pose === 'moveLegs' ? -4 : pose === 'squat' ? -2 : 0;
+        refereeFighter.style.transform = `translateX(${wiggle}px)`;
+    }
 }
 
 // Update game state from server
@@ -399,6 +447,8 @@ async function resetGame() {
 
         startEnemyTurnLoop();
         startIdleMovement();
+        startRefereeAnimation();
+        setRefereePose('fight');
         themeMusic.play().catch(e => console.log('Audio play prevented:', e));
 
     } catch (error) {

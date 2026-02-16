@@ -162,6 +162,19 @@ h1 {
     height: 300px;
 }
 
+.fighter.referee {
+    position: absolute;
+    right: 8px;
+    bottom: 10px;
+    z-index: 2;
+    transform: translateX(0);
+}
+
+.fighter.referee img {
+    height: 210px;
+    opacity: 0.95;
+}
+
 /* Message Display */
 .message {
     text-align: center;

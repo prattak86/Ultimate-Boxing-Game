@@ -21,11 +21,11 @@ public class GameService {
         this.gameState = new GameState();
     }
 
-    public GameState getGameState() {
+    public synchronized GameState getGameState() {
         return gameState;
     }
 
-    public GameState resetGame() {
+    public synchronized GameState resetGame() {
         this.gameState = new GameState();
         return gameState;
     }
@@ -105,10 +105,10 @@ public class GameService {
             gameState.setPlayerScore(gameState.getPlayerScore() + points);
             gameState.setConsecutiveHits(consecutiveHits + 1);
 
-            gameState.setMessage("Hit! +" + points + " points");
+            appendMessage("Hit! +" + points + " points");
         } else {
             gameState.setConsecutiveHits(0);
-            gameState.setMessage("Blocked!");
+            appendMessage("Blocked!");
         }
     }
 

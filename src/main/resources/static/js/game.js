@@ -1,6 +1,10 @@
 // Game state
 let gameState = null;
 let isProcessingAction = false;
+let enemyTurnTimer = null;
+let idlePulseTimer = null;
+let playerPositionX = -140;
+let enemyPositionX = 140;
 
 // Audio elements
 const crowdCheer = document.getElementById('crowd-cheer');
@@ -28,6 +32,8 @@ const scoreText = document.getElementById('score-text');
 const messageDisplay = document.getElementById('message-display');
 const playerImg = document.getElementById('player-img');
 const enemyImg = document.getElementById('enemy-img');
+const playerFighter = document.getElementById('player-sprite');
+const enemyFighter = document.getElementById('enemy-sprite');
 
 // Buttons
 const startButton = document.getElementById('start-button');
@@ -52,7 +58,7 @@ resetButton.addEventListener('click', resetGame);
 document.addEventListener('keydown', (e) => {
     if (gameScreen.style.display === 'none') return;
     if (isProcessingAction) return;
-    
+
     const key = e.key.toLowerCase();
     if (key === 'a') {
         performAction('leftPunch');
@@ -67,26 +73,26 @@ document.addEventListener('keydown', (e) => {
 async function startGame() {
     startScreen.style.display = 'none';
     gameScreen.style.display = 'block';
-    
-    // Play crowd cheer with error handling
+
     crowdCheer.play().catch(e => console.log('Audio play prevented:', e));
-    
-    // Wait a bit then start music
+
     setTimeout(() => {
         themeMusic.play().catch(e => console.log('Audio play prevented:', e));
     }, 1000);
-    
-    // Get initial game state
+
     await updateGameState();
+    startEnemyTurnLoop();
+    startIdleMovement();
+    applyFighterPositions();
 }
 
 // Perform player action
 async function performAction(action) {
     if (isProcessingAction || gameState?.gameOver) return;
-    
+
     isProcessingAction = true;
     disableControls();
-    
+
     try {
         const response = await fetch('/api/game/action', {
             method: 'POST',
@@ -95,35 +101,35 @@ async function performAction(action) {
             },
             body: JSON.stringify({ action: action })
         });
-        
+
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
-        
+
         gameState = await response.json();
         updateUI();
-        
-        // Play sounds based on message with error handling
+        animateExchange(action, gameState.enemy.action);
+
         if (gameState.message.includes('Hit')) {
             punchSound.play().catch(e => console.log('Audio play prevented:', e));
         } else if (gameState.message.includes('Blocked')) {
             missSound.play().catch(e => console.log('Audio play prevented:', e));
         }
-        
-        // Reset sprites after animation
+
         setTimeout(() => {
             if (!gameState.gameOver) {
                 resetSprites();
+                settlePositions();
             }
         }, 500);
-        
-        // Check for game over
+
         if (gameState.gameOver) {
+            stopGameLoops();
             setTimeout(() => {
                 showGameOver();
             }, 1000);
         }
-        
+
     } catch (error) {
         console.error('Error performing action:', error);
         messageDisplay.textContent = 'Error connecting to server';
@@ -135,6 +141,121 @@ async function performAction(action) {
             }
         }, 300);
     }
+}
+
+async function performEnemyTurn() {
+    if (isProcessingAction || gameState?.gameOver) return;
+
+    try {
+        const response = await fetch('/api/game/enemy-turn', {
+            method: 'POST'
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        gameState = await response.json();
+        updateUI();
+        animateExchange('none', gameState.enemy.action);
+
+        if (gameState.message.includes('Enemy hit you')) {
+            punchSound.play().catch(e => console.log('Audio play prevented:', e));
+        }
+
+        setTimeout(() => {
+            if (!gameState.gameOver) {
+                resetSprites();
+                settlePositions();
+            }
+        }, 500);
+
+        if (gameState.gameOver) {
+            stopGameLoops();
+            setTimeout(() => showGameOver(), 1000);
+        }
+    } catch (error) {
+        console.error('Error during enemy turn:', error);
+    }
+}
+
+function startEnemyTurnLoop() {
+    if (enemyTurnTimer) {
+        clearInterval(enemyTurnTimer);
+    }
+
+    enemyTurnTimer = setInterval(() => {
+        performEnemyTurn();
+    }, 2200);
+}
+
+function startIdleMovement() {
+    if (idlePulseTimer) {
+        clearInterval(idlePulseTimer);
+    }
+
+    idlePulseTimer = setInterval(() => {
+        if (isProcessingAction || gameState?.gameOver) {
+            return;
+        }
+
+        const drift = Math.random() > 0.5 ? 8 : -8;
+        playerPositionX += drift;
+        enemyPositionX -= drift;
+
+        playerPositionX = clamp(playerPositionX, -180, -80);
+        enemyPositionX = clamp(enemyPositionX, 80, 180);
+
+        applyFighterPositions();
+    }, 600);
+}
+
+function stopGameLoops() {
+    if (enemyTurnTimer) {
+        clearInterval(enemyTurnTimer);
+        enemyTurnTimer = null;
+    }
+
+    if (idlePulseTimer) {
+        clearInterval(idlePulseTimer);
+        idlePulseTimer = null;
+    }
+}
+
+function animateExchange(playerAction, enemyAction) {
+    if (playerAction === 'leftPunch' || playerAction === 'rightPunch') {
+        playerPositionX = -90;
+    } else if (playerAction === 'block') {
+        playerPositionX = -125;
+    }
+
+    if (enemyAction === 'leftHook' || enemyAction === 'rightHook') {
+        enemyPositionX = 95;
+    } else if (enemyAction === 'blocking') {
+        enemyPositionX = 120;
+    }
+
+    applyFighterPositions();
+}
+
+function settlePositions() {
+    playerPositionX = -140;
+    enemyPositionX = 140;
+    applyFighterPositions();
+}
+
+function applyFighterPositions() {
+    if (playerFighter) {
+        playerFighter.style.transform = `translateX(${playerPositionX}px)`;
+    }
+
+    if (enemyFighter) {
+        enemyFighter.style.transform = `translateX(${enemyPositionX}px)`;
+    }
+}
+
+function clamp(value, min, max) {
+    return Math.max(min, Math.min(max, value));
 }
 
 // Update game state from server
@@ -154,15 +275,13 @@ async function updateGameState() {
 // Update UI based on game state
 function updateUI() {
     if (!gameState) return;
-    
-    // Update health bars
+
     const playerHealthPercent = (gameState.player.health / gameState.player.maxHealth) * 100;
     const enemyHealthPercent = (gameState.enemy.health / gameState.enemy.maxHealth) * 100;
-    
+
     playerHealthBar.style.width = playerHealthPercent + '%';
     enemyHealthBar.style.width = enemyHealthPercent + '%';
-    
-    // Update health bar colors
+
     if (playerHealthPercent > 50) {
         playerHealthBar.style.background = '#00ff00';
     } else if (playerHealthPercent > 25) {
@@ -170,7 +289,7 @@ function updateUI() {
     } else {
         playerHealthBar.style.background = '#ff0000';
     }
-    
+
     if (enemyHealthPercent > 50) {
         enemyHealthBar.style.background = '#00ff00';
     } else if (enemyHealthPercent > 25) {
@@ -178,27 +297,20 @@ function updateUI() {
     } else {
         enemyHealthBar.style.background = '#ff0000';
     }
-    
-    // Update score
+
     scoreText.textContent = 'Player Score: ' + gameState.playerScore;
-    
-    // Update message
     messageDisplay.textContent = gameState.message || '';
-    
-    // Update fighter sprites
     updateSprites();
 }
 
-// Update fighter sprites based on action
 function updateSprites() {
     if (!gameState) return;
-    
+
     const playerAction = gameState.player.action;
     const enemyAction = gameState.enemy.action;
     const playerWounded = gameState.player.wounded;
     const enemyWounded = gameState.enemy.wounded;
-    
-    // Update player sprite
+
     const playerPrefix = playerWounded ? 'playerBaseWounded' : 'playerBase';
     switch (playerAction) {
         case 'leftHook':
@@ -213,8 +325,7 @@ function updateSprites() {
         default:
             playerImg.src = `/images/${playerPrefix}.png`;
     }
-    
-    // Update enemy sprite
+
     const enemyPrefix = enemyWounded ? 'enemyBaseWounded' : 'enemyBase';
     switch (enemyAction) {
         case 'leftHook':
@@ -231,25 +342,23 @@ function updateSprites() {
     }
 }
 
-// Reset sprites to base
 function resetSprites() {
     if (!gameState) return;
-    
+
     const playerWounded = gameState.player.wounded;
     const enemyWounded = gameState.enemy.wounded;
-    
+
     playerImg.src = `/images/${playerWounded ? 'playerBaseWounded' : 'playerBase'}.png`;
     enemyImg.src = `/images/${enemyWounded ? 'enemyBaseWounded' : 'enemyBase'}.png`;
 }
 
-// Show game over screen
 function showGameOver() {
     gameScreen.style.display = 'none';
     gameoverScreen.style.display = 'block';
-    
+
     themeMusic.pause();
     themeMusic.currentTime = 0;
-    
+
     if (gameState.playerWon) {
         resultImage.src = '/images/YouWin.jpg';
         resultText.textContent = 'YOU WIN!';
@@ -261,49 +370,48 @@ function showGameOver() {
         resultText.style.color = '#ff0000';
         crowdSad.play().catch(e => console.log('Audio play prevented:', e));
     }
-    
+
     finalScore.textContent = 'Final Score: ' + gameState.playerScore;
 }
 
-// Reset game
 async function resetGame() {
     try {
         const response = await fetch('/api/game/reset', {
             method: 'POST'
         });
-        
+
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
-        
+
         gameState = await response.json();
-        
+
         gameoverScreen.style.display = 'none';
         gameScreen.style.display = 'block';
-        
+
+        settlePositions();
         updateUI();
         enableControls();
-        
+
+        startEnemyTurnLoop();
+        startIdleMovement();
         themeMusic.play().catch(e => console.log('Audio play prevented:', e));
-        
+
     } catch (error) {
         console.error('Error resetting game:', error);
     }
 }
 
-// Disable control buttons
 function disableControls() {
     leftPunchBtn.disabled = true;
     blockBtn.disabled = true;
     rightPunchBtn.disabled = true;
 }
 
-// Enable control buttons
 function enableControls() {
     leftPunchBtn.disabled = false;
     blockBtn.disabled = false;
     rightPunchBtn.disabled = false;
 }
 
-// Initialize
 console.log('Ultimate Boxing Game loaded!');

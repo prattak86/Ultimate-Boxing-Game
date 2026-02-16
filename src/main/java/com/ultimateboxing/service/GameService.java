@@ -29,7 +29,7 @@ public class GameService {
         return gameState;
     }
 
-    public GameState processPlayerAction(String action) {
+    public synchronized GameState processPlayerAction(String action) {
         if (gameState.isGameOver()) {
             return gameState;
         }
@@ -40,6 +40,9 @@ public class GameService {
         // Reset actions
         player.setAction("base");
         enemy.setAction("base");
+
+        // Enemy decides first so blocks can mitigate incoming punches this turn
+        enemyAI();
 
         // Process player action
         switch (action) {
@@ -59,13 +62,31 @@ public class GameService {
                 break;
         }
 
-        // Enemy AI action (random behavior)
-        enemyAI();
-
         // Check for game over
         checkGameOver();
 
         // Reset actions after a brief delay (will be handled by frontend)
+        return gameState;
+    }
+
+    /**
+     * Processes an enemy-only turn so the game keeps moving even if the player idles.
+     */
+    public synchronized GameState processEnemyTurn() {
+        if (gameState.isGameOver()) {
+            return gameState;
+        }
+
+        FighterState player = gameState.getPlayer();
+        FighterState enemy = gameState.getEnemy();
+
+        player.setAction("base");
+        enemy.setAction("base");
+        gameState.setMessage("Stay alert...");
+
+        enemyAI();
+        checkGameOver();
+
         return gameState;
     }
 
@@ -98,7 +119,7 @@ public class GameService {
         // Simple AI: random action
         double actionChoice = random.nextDouble();
         
-        if (actionChoice < 0.3) {
+        if (actionChoice < 0.4) {
             // Enemy punches (30% chance each left/right)
             if (random.nextBoolean()) {
                 enemy.setAction("leftHook");
@@ -111,13 +132,27 @@ public class GameService {
                 double damage = 10.0 * PLAYER_DAMAGE_RESIST;
                 player.setHealth(player.getHealth() - damage);
                 gameState.setConsecutiveHits(0); // Reset combo on being hit
-                gameState.setMessage(gameState.getMessage() + " Enemy hit you!");
+                appendMessage("Enemy hit you!");
+            } else {
+                appendMessage("Enemy punch blocked!");
             }
-        } else if (actionChoice < 0.5) {
+        } else if (actionChoice < 0.7) {
             // Enemy blocks (20% chance)
             enemy.setAction("blocking");
+            appendMessage("Enemy is blocking.");
         }
-        // 50% chance enemy does nothing
+        // 30% chance enemy does nothing
+    }
+
+    private void appendMessage(String text) {
+        String currentMessage = gameState.getMessage();
+
+        if (currentMessage == null || currentMessage.isBlank()) {
+            gameState.setMessage(text);
+            return;
+        }
+
+        gameState.setMessage(currentMessage + " " + text);
     }
 
     private void checkGameOver() {

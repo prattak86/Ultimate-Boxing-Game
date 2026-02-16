@@ -110,9 +110,10 @@ async function performAction(action) {
         updateUI();
         animateExchange(action, gameState.enemy.action);
 
-        if (gameState.message.includes('Hit')) {
+        const message = (gameState.message || '').toLowerCase();
+        if (message.includes('hit')) {
             punchSound.play().catch(e => console.log('Audio play prevented:', e));
-        } else if (gameState.message.includes('Blocked')) {
+        } else if (message.includes('blocked')) {
             missSound.play().catch(e => console.log('Audio play prevented:', e));
         }
 
@@ -159,8 +160,11 @@ async function performEnemyTurn() {
         updateUI();
         animateExchange('none', gameState.enemy.action);
 
-        if (gameState.message.includes('Enemy hit you')) {
+        const enemyMessage = (gameState.message || '').toLowerCase();
+        if (enemyMessage.includes('enemy hit you')) {
             punchSound.play().catch(e => console.log('Audio play prevented:', e));
+        } else if (enemyMessage.includes('blocked')) {
+            missSound.play().catch(e => console.log('Audio play prevented:', e));
         }
 
         setTimeout(() => {
